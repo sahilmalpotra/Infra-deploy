@@ -27,6 +27,7 @@ jobs:
       stack-name: irs-taxtools-dev-ecr-role
       template-file: cloudformation/iam/ecr-role.yml
       parameters-file: cloudformation/iam/ecr-iam-params.json
+      tags-file: ./tags.json
 
   deploy-github-role:
     uses: sahilmalpotra/resuable-workflow/.github/workflows/aws-cfn-deploy.yml@main
@@ -38,3 +39,4 @@ jobs:
       stack-name: irs-taxtools-dev-github-role
       template-file: cloudformation/iam/github_role.yml
       parameters-file: cloudformation/iam/github_params.json
+      tags-file: ./tags.json

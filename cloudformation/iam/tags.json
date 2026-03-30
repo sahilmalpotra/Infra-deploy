@@ -1,0 +1,14 @@
+[
+  {
+    "Key": "Environment",
+    "Value": "dev"
+  },
+  {
+    "Key": "ManagedBy",
+    "Value": "GitHubActions"
+  },
+  {
+    "Key": "Project",
+    "Value": "MyInfrastructure"
+  }
+]

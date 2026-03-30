@@ -1,0 +1,184 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation deploy role for GitHub Actions to deploy IRS Tax Tools infra
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: irs-taxtools
+    Description: Project prefix used for naming resources
+
+  GitHubOrg:
+    Type: String
+    Description: GitHub organization or user name
+
+  GitHubRepo:
+    Type: String
+    Description: GitHub repository name
+
+  OidcProviderArn:
+    Type: String
+    Description: ARN of the GitHub OIDC provider in this AWS account
+
+  BootstrapRoleName:
+    Type: String
+    Default: GitHubActionsOIDCRole
+    Description: Existing GitHub OIDC bootstrap role name
+
+  EnvironmentName:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+    Description: Environment name
+
+Resources:
+
+  CfnDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${EnvironmentName}-cfn-deploy-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/${BootstrapRoleName}"
+            Action: sts:AssumeRole
+      Path: /
+      MaxSessionDuration: 3600
+      Policies:
+        - PolicyName: CfnDeployPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CloudFormation
+                Effect: Allow
+                Action:
+                  - cloudformation:CreateStack
+                  - cloudformation:UpdateStack
+                  - cloudformation:DeleteStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:DeleteChangeSet
+                  - cloudformation:GetTemplate
+                  - cloudformation:ValidateTemplate
+                  - cloudformation:ListStackResources
+                  - cloudformation:DescribeChangeSet
+                Resource: "*"
+
+              - Sid: IAMForCfn
+                Effect: Allow
+                Action:
+                  - iam:CreateRole
+                  - iam:DeleteRole
+                  - iam:GetRole
+                  - iam:UpdateAssumeRolePolicy
+                  - iam:PutRolePolicy
+                  - iam:DeleteRolePolicy
+                  - iam:AttachRolePolicy
+                  - iam:DetachRolePolicy
+                  - iam:TagRole
+                  - iam:UntagRole
+                  - iam:PassRole
+                  - iam:ListRolePolicies
+                  - iam:ListAttachedRolePolicies
+                Resource: "*"
+
+              - Sid: EC2NetworkingRead
+                Effect: Allow
+                Action:
+                  - ec2:DescribeVpcs
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeRouteTables
+                  - ec2:DescribeInternetGateways
+                  - ec2:DescribeNatGateways
+                  - ec2:DescribeAvailabilityZones
+                Resource: "*"
+
+              - Sid: ELBForStackDeployment
+                Effect: Allow
+                Action:
+                  - elasticloadbalancing:CreateLoadBalancer
+                  - elasticloadbalancing:DeleteLoadBalancer
+                  - elasticloadbalancing:DescribeLoadBalancers
+                  - elasticloadbalancing:CreateTargetGroup
+                  - elasticloadbalancing:DeleteTargetGroup
+                  - elasticloadbalancing:DescribeTargetGroups
+                  - elasticloadbalancing:CreateListener
+                  - elasticloadbalancing:DeleteListener
+                  - elasticloadbalancing:ModifyLoadBalancerAttributes
+                  - elasticloadbalancing:ModifyTargetGroupAttributes
+                  - elasticloadbalancing:DescribeListeners
+                  - elasticloadbalancing:AddTags
+                  - elasticloadbalancing:RemoveTags
+                Resource: "*"
+
+              - Sid: ECSForStackDeployment
+                Effect: Allow
+                Action:
+                  - ecs:CreateCluster
+                  - ecs:DeleteCluster
+                  - ecs:DescribeClusters
+                  - ecs:RegisterTaskDefinition
+                  - ecs:DeregisterTaskDefinition
+                  - ecs:CreateService
+                  - ecs:UpdateService
+                  - ecs:DeleteService
+                  - ecs:DescribeServices
+                  - ecs:DescribeTaskDefinition
+                Resource: "*"
+
+              - Sid: CloudWatchLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutRetentionPolicy
+                  - logs:PutResourcePolicy
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                  - logs:PutLogEvents
+                Resource: "*"
+
+              - Sid: ECRReadForDeployments
+                Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:BatchGetImage
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:DescribeRepositories
+                  - ecr:DescribeImages
+                Resource: "*"
+
+              - Sid: S3ForDeploymentArtifacts
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource: "*"
+
+              - Sid: CloudFrontForStackDeployment
+                Effect: Allow
+                Action:
+                  - cloudfront:CreateDistribution
+                  - cloudfront:UpdateDistribution
+                  - cloudfront:DeleteDistribution
+                  - cloudfront:GetDistribution
+                  - cloudfront:GetDistributionConfig
+                  - cloudfront:ListDistributions
+                  - cloudfront:CreateInvalidation
+                Resource: "*"
+
+Outputs:
+  CfnDeployRoleArn:
+    Description: ARN of the CloudFormation deploy role
+    Value: !GetAtt CfnDeployRole.Arn
+
+  CfnDeployRoleName:
+    Description: Name of the CloudFormation deploy role
+    Value: !Ref CfnDeployRole

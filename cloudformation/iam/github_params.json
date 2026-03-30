@@ -1,0 +1,9 @@
+{
+	"ProjectName": "irs-taxtools",
+	"GitHubOrg": "sahilmalpotra",
+	"GitHubRepo": "Infra-deploy",
+	"OidcProviderArn": "arn:aws:iam::034651302876:oidc-provider/token.actions.githubusercontent.com",
+	"BootstrapRoleName": "GitHubActionsOIDCRole",
+	"EnvironmentName": "dev",
+	"Region": "us-east-1"
+}

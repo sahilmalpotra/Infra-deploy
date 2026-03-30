@@ -1,0 +1,40 @@
+name: Deploy IAM Roles
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment (e.g., dev, qa, prd)'
+        required: true
+        default: 'dev'
+      account_id:
+        description: 'AWS Account ID'
+        required: true
+        default: '034651302876'
+      region:
+        description: 'AWS Region'
+        required: true
+        default: 'us-east-1'
+
+jobs:
+  deploy-ecr-role:
+    uses: sahilmalpotra/resuable-workflow/.github/workflows/aws-cfn-deploy.yml@main
+    with:
+      environment: ${{ github.event.inputs.environment }}
+      account-id: ${{ github.event.inputs.account_id }}
+      region: ${{ github.event.inputs.region }}
+      role-name: irs-taxtools-dev-cfn-deploy-role
+      stack-name: irs-taxtools-dev-ecr-role
+      template-file: cloudformation/iam/ecr-role.yml
+      parameters-file: cloudformation/iam/ecr-iam-params.json
+
+  deploy-github-role:
+    uses: sahilmalpotra/resuable-workflow/.github/workflows/aws-cfn-deploy.yml@main
+    with:
+      environment: ${{ github.event.inputs.environment }}
+      account-id: ${{ github.event.inputs.account_id }}
+      region: ${{ github.event.inputs.region }}
+      role-name: irs-taxtools-dev-cfn-deploy-role
+      stack-name: irs-taxtools-dev-github-role
+      template-file: cloudformation/iam/github_role.yml
+      parameters-file: cloudformation/iam/github_params.json

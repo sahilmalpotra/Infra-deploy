@@ -15,6 +15,10 @@ on:
         description: 'AWS Region'
         required: true
         default: 'us-east-1'
+permissions:
+  id-token: write
+  contents: read        
+        
 
 jobs:
   deploy-ecr-role:

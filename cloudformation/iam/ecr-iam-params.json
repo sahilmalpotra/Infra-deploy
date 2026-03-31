@@ -2,6 +2,6 @@
 	"ProjectName": "irs-taxtools",
 	"EnvironmentName": "dev",
 	"CfnDeployRoleName": "irs-taxtools-dev-cfn-deploy-role",
-	"EcrRepositoryName": "irs-taxtools-app"
+	"EcrRepositoryName": "irs-taxtools-app",
 	"Region": "us-east-1"
 }

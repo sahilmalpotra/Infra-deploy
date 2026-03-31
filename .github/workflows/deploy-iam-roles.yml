@@ -44,3 +44,4 @@ jobs:
       template-file: cloudformation/iam/github_role.yml
       parameters-file: cloudformation/iam/github_params.json
       tags-file: ./tags.json
+      capabilities: CAPABILITY_NAMED_IAM

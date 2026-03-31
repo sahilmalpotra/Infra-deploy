@@ -24,6 +24,11 @@ Parameters:
     Default: irs-taxtools-app
     Description: ECR repository name to manage
 
+  Region:
+    Type: String
+    Default: us-east-1
+    Description: region name
+
 Resources:
   EcrAccessRole:
     Type: AWS::IAM::Role

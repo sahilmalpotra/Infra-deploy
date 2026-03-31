@@ -2,96 +2,100 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: ECR access role for GitHub Actions CI/CD
 
 Parameters:
-  ProjectName:
-    Type: String
-    Default: irs-taxtools
-    Description: Project prefix used for naming resources
+  ProjectName:
+    Type: String
+    Default: irs-taxtools
+    Description: Project prefix used for naming resources
 
-  EnvironmentName:
-    Type: String
-    Default: dev
-    AllowedValues:
-      - dev
-    Description: Environment name
+  EnvironmentName:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+    Description: Environment name
 
-  CfnDeployRoleName:
-    Type: String
-    Default: irs-taxtools-dev-cfn-deploy-role
-    Description: Existing CloudFormation deploy role name that assumes this role
+  CfnDeployRoleName:
+    Type: String
+    Default: irs-taxtools-dev-cfn-deploy-role
+    Description: Existing CloudFormation deploy role name that assumes this role
 
-  EcrRepositoryName:
-    Type: String
-    Default: irs-taxtools-app
-    Description: ECR repository name to manage
+  EcrRepositoryName:
+    Type: String
+    Default: irs-taxtools-app
+    Description: ECR repository name to manage
 
   Region:
     Type: String
-    Default: us-east-1
-    Description: region name
+    Default: us-east-1
+    Description: region name
 
 Resources:
-  EcrAccessRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "${ProjectName}-${EnvironmentName}-ecr-access-role"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/${CfnDeployRoleName}"
-            Action: sts:AssumeRole
-      Path: /
-      MaxSessionDuration: 3600
-      Policies:
-        - PolicyName: EcrAccessPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Sid: EcrAuth
-                Effect: Allow
-                Action:
-                  - ecr:GetAuthorizationToken
-                Resource: "*"
+  EcrAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${EnvironmentName}-ecr-access-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              # We use !Sub here to build the ARN correctly
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: sts:AssumeRole
+            Condition:
+              StringLike:
+                "aws:PrincipalArn": !Sub "arn:aws:iam::${AWS::AccountId}:role/${CfnDeployRoleName}"
+      Path: /
+      MaxSessionDuration: 3600
+      Policies:
+        - PolicyName: EcrAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: EcrAuth
+                Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                Resource: "*"
 
-              - Sid: EcrRepositoryManagement
-                Effect: Allow
-                Action:
-                  - ecr:CreateRepository
-                  - ecr:DeleteRepository
-                  - ecr:DescribeRepositories
-                  - ecr:ListImages
-                  - ecr:DescribeImages
-                  - ecr:GetRepositoryPolicy
-                  - ecr:SetRepositoryPolicy
-                  - ecr:PutLifecyclePolicy
-                  - ecr:GetLifecyclePolicy
-                  - ecr:DeleteLifecyclePolicy
-                  - ecr:TagResource
-                  - ecr:UntagResource
-                Resource:
-                  - !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${EcrRepositoryName}"
-                  - !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
+              - Sid: EcrRepositoryManagement
+                Effect: Allow
+                Action:
+                  - ecr:CreateRepository
+                  - ecr:DeleteRepository
+                  - ecr:DescribeRepositories
+                  - ecr:ListImages
+                  - ecr:DescribeImages
+                  - ecr:GetRepositoryPolicy
+                  - ecr:SetRepositoryPolicy
+                  - ecr:PutLifecyclePolicy
+                  - ecr:GetLifecyclePolicy
+                  - ecr:DeleteLifecyclePolicy
+                  - ecr:TagResource
+                  - ecr:UntagResource
+                Resource:
+                  - !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${EcrRepositoryName}"
+                  - !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
 
-              - Sid: EcrImagePushPull
-                Effect: Allow
-                Action:
-                  - ecr:BatchCheckLayerAvailability
-                  - ecr:BatchGetImage
-                  - ecr:CompleteLayerUpload
-                  - ecr:DescribeImages
-                  - ecr:InitiateLayerUpload
-                  - ecr:PutImage
-                  - ecr:UploadLayerPart
-                Resource:
-                  - !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${EcrRepositoryName}"
-                  - !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
+              - Sid: EcrImagePushPull
+                Effect: Allow
+                Action:
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:BatchGetImage
+                  - ecr:CompleteLayerUpload
+                  - ecr:DescribeImages
+                  - ecr:InitiateLayerUpload
+                  - ecr:PutImage
+                  - ecr:UploadLayerPart
+                Resource:
+                  - !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${EcrRepositoryName}"
+                  - !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
 
 Outputs:
-  EcrAccessRoleArn:
-    Description: ARN of the ECR access role
-    Value: !GetAtt EcrAccessRole.Arn
+  EcrAccessRoleArn:
+    Description: ARN of the ECR access role
+    Value: !GetAtt EcrAccessRole.Arn
 
-  EcrAccessRoleName:
-    Description: Name of the ECR access role
-    Value: !Ref EcrAccessRole
+  EcrAccessRoleName:
+    Description: Name of the ECR access role
+    Value: !Ref EcrAccessRole

@@ -37,7 +37,6 @@ Parameters:
     Description: Region name
 
 Resources:
-
   CfnDeployRole:
     Type: AWS::IAM::Role
     Properties:

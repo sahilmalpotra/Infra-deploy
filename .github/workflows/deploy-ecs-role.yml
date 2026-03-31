@@ -1,4 +1,4 @@
-name: Deploy ECS Roles
+name: Deploy ECS IAM Roles
 
 on:
   workflow_dispatch:
@@ -16,17 +16,24 @@ on:
         required: true
         default: 'us-east-1'
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  deploy-ecr-role:
+  deploy-ecs-roles:
     uses: sahilmalpotra/resuable-workflow/.github/workflows/aws-cfn-deploy.yml@main
     permissions:
       contents: read
-      id-token: write  # Required for AWS OIDC authentication
+      id-token: write
     with:
       environment: ${{ github.event.inputs.environment }}
       account-id: ${{ github.event.inputs.account_id }}
       region: ${{ github.event.inputs.region }}
       role-name: irs-taxtools-dev-cfn-deploy-role
-      stack-name: irs-taxtools-dev-ecs-role
+      stack-name: irs-taxtools-dev-ecs-roles
+      # Ensure these paths match your repository structure
       template-file: cloudformation/iam/ecs-role.yml
       parameters-file: cloudformation/iam/ecs-params.json
+      tags-file: ./tags.json
+      capabilities: CAPABILITY_NAMED_IAM

@@ -1,0 +1,36 @@
+name: 🗑️ Delete CloudFormation Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      stack_name:
+        description: 'Exact name of the stack to delete'
+        required: true
+        default: 'irs-taxtools-dev-ecs-roles'
+      region:
+        description: 'AWS Region'
+        required: true
+        default: 'us-east-1'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  delete-stack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔐 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::034651302876:role/irs-taxtools-dev-cfn-deploy-role
+          aws-region: ${{ github.event.inputs.region }}
+
+      - name: 🧨 Delete Stack
+        run: |
+          echo "Deleting stack: ${{ github.event.inputs.stack_name }}..."
+          aws cloudformation delete-stack --stack-name ${{ github.event.inputs.stack_name }}
+          
+          echo "Waiting for stack deletion to complete..."
+          aws cloudformation wait stack-delete-complete --stack-name ${{ github.event.inputs.stack_name }}
+          echo "✅ Stack deleted successfully."

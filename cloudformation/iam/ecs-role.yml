@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: ECS IAM role for task execution and service deployment
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: irs-taxtools
+    Description: Project prefix used for naming resources
+
+  EnvironmentName:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+    Description: Environment name
+
+  CfnDeployRoleName:
+    Type: String
+    Default: irs-taxtools-dev-cfn-deploy-role
+    Description: Existing CloudFormation deploy role name
+
+Resources:
+  EcsTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${EnvironmentName}-ecs-task-execution-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: EcsTaskExecutionExtras
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CloudWatchLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogStreams
+                  - logs:DescribeLogGroups
+                Resource: "*"
+
+              - Sid: EcrPull
+                Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                Resource: "*"
+
+              - Sid: SsmRead
+                Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParameterHistory
+                Resource: "*"
+
+              - Sid: SecretsManagerRead
+                Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:DescribeSecret
+                Resource: "*"
+
+              - Sid: KmsDecrypt
+                Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: "*"
+
+  EcsServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${EnvironmentName}-ecs-service-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole
+
+Outputs:
+  EcsTaskExecutionRoleArn:
+    Description: ARN of the ECS task execution role
+    Value: !GetAtt EcsTaskExecutionRole.Arn
+
+  EcsTaskExecutionRoleName:
+    Description: Name of the ECS task execution role
+    Value: !Ref EcsTaskExecutionRole
+
+  EcsServiceRoleArn:
+    Description: ARN of the ECS service role
+    Value: !GetAtt EcsServiceRole.Arn
+
+  EcsServiceRoleName:
+    Description: Name of the ECS service role
+    Value: !Ref EcsServiceRole
+

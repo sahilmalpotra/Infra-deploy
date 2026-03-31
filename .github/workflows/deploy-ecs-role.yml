@@ -1,0 +1,32 @@
+name: Deploy ECS Roles
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment (e.g., dev, qa, prd)'
+        required: true
+        default: 'dev'
+      account_id:
+        description: 'AWS Account ID'
+        required: true
+        default: '034651302876'
+      region:
+        description: 'AWS Region'
+        required: true
+        default: 'us-east-1'
+
+jobs:
+  deploy-ecr-role:
+    uses: sahilmalpotra/resuable-workflow/.github/workflows/aws-cfn-deploy.yml@main
+    permissions:
+      contents: read
+      id-token: write  # Required for AWS OIDC authentication
+    with:
+      environment: ${{ github.event.inputs.environment }}
+      account-id: ${{ github.event.inputs.account_id }}
+      region: ${{ github.event.inputs.region }}
+      role-name: irs-taxtools-dev-cfn-deploy-role
+      stack-name: irs-taxtools-dev-ecs-role
+      template-file: cloudformation/iam/ecs-role.yml
+      parameters-file: cloudformation/iam/ecs-params.json

@@ -23,6 +23,9 @@ permissions:
 jobs:
   deploy-ecr-role:
     uses: sahilmalpotra/resuable-workflow/.github/workflows/aws-cfn-deploy.yml@main
+    permissions:
+      contents: read
+      id-token: write  # Required for AWS OIDC authentication
     with:
       environment: ${{ github.event.inputs.environment }}
       account-id: ${{ github.event.inputs.account_id }}

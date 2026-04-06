@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation template to create an ECS cluster for IRS Tax Tools application
-Transform: AWS:languageExtensions
+#Transform: AWS:languageExtensions
 
 Parameters:
   ProjectName:
@@ -14,7 +14,7 @@ Parameters:
     AllowedValues:
       - dev
     Description: Environment name
-    
+
   CfnDeployRoleName:
     Type: String
     Default: irs-taxtools-dev-cfn-deploy-role

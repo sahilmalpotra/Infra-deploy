@@ -52,9 +52,9 @@ Resources:
         - Key: Environment
           Value: !Sub "${EnvironmentName}"                  
 
-  Outputs:
-    ClusterName:
-      Description: Name of the ECS cluster
+Outputs:
+  ClusterName:
+    Description: Name of the ECS cluster
       Value: !Ref ECSCreateCluster
       Export:
         Name: !Sub "${ProjectName}-${EnvironmentName}-ECSClusterName"

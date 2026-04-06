@@ -1,6 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation template to create an ECS cluster for IRS Tax Tools application
-#Transform: AWS:languageExtensions
 
 Parameters:
   ProjectName:
@@ -20,17 +19,17 @@ Parameters:
     Default: irs-taxtools-dev-cfn-deploy-role
     Description: Existing CloudFormation deploy role name
 
-
 Resources:
   ECSCreateCluster:
-      Type: AWS::ECS::Cluster
-      Properties:
-        ClusterName: !Sub "${ProjectName}-${EnvironmentName}-cluster"
-        CapacityProviders:
-          - FARGATE
-        DefaultCapacityProviderStrategy:
-          - CapacityProvider: FARGATE
-            Weight: 1
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "${ProjectName}-${EnvironmentName}-cluster"
+      CapacityProviders:
+        - FARGATE
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: FARGATE
+          Weight: 1
+
   LogGroup1040:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -41,6 +40,7 @@ Resources:
           Value: !Sub "${ProjectName}"
         - Key: Environment
           Value: !Sub "${EnvironmentName}"
+
   LogGroupTIA:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -55,21 +55,24 @@ Resources:
 Outputs:
   ClusterName:
     Description: Name of the ECS cluster
-      Value: !Ref ECSCreateCluster
-      Export:
-        Name: !Sub "${ProjectName}-${EnvironmentName}-ECSClusterName"
-    ClusterArn:
-      Description: ARN of the ECS cluster
-      Value: !GetAtt ECSCreateCluster.Arn
-      Export:
-        Name: !Sub "${ProjectName}-${EnvironmentName}-ECSClusterArn"  
-    LogGroup1040:
-      Description: Log group for 1040 API
-      Value: !Ref LogGroup1040
-      Export:
-        Name: !Sub "${ProjectName}-${EnvironmentName}-ECS1040LogGroup"
-    LogGroupTIA:
-      Description: Log group for TIA API
-      Value: !Ref LogGroupTIA
-      Export:
-        Name: !Sub "${ProjectName}-${EnvironmentName}-ECSTIALogGroup" 
+    Value: !Ref ECSCreateCluster
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-ECSClusterName"
+
+  ClusterArn:
+    Description: ARN of the ECS cluster
+    Value: !GetAtt ECSCreateCluster.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-ECSClusterArn"  
+
+  LogGroup1040:
+    Description: Log group for 1040 API
+    Value: !Ref LogGroup1040
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-ECS1040LogGroup"
+
+  LogGroupTIA:
+    Description: Log group for TIA API
+    Value: !Ref LogGroupTIA
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-ECSTIALogGroup"

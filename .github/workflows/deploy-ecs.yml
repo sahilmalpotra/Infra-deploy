@@ -36,4 +36,4 @@ jobs:
       template-file: cloudformation/ecs/ecs-cluster.yml
       parameters-file: cloudformation/ecs/ecs-params.json
       tags-file: ./tags.json
-      capabilities: CAPABILITY_NAMED_IAM
+      capabilities: CAPABILITY_NAMED_IAM, CAPABILITY_AUTO_EXPAND

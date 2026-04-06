@@ -1,0 +1,5 @@
+{
+	"ProjectName": "irs-taxtools",
+	"EnvironmentName": "dev",
+    "CfnDeployRoleName": "irs-taxtools-dev-cfn-deploy-role"
+}

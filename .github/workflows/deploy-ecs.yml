@@ -1,0 +1,39 @@
+name: Deploy ECS-cluster and Log Groups
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment (e.g., dev, qa, prd)'
+        required: true
+        default: 'dev'
+      account_id:
+        description: 'AWS Account ID'
+        required: true
+        default: '034651302876'
+      region:
+        description: 'AWS Region'
+        required: true
+        default: 'us-east-1'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-ecs-roles:
+    uses: sahilmalpotra/resuable-workflow/.github/workflows/aws-cfn-deploy.yml@main
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      environment: ${{ github.event.inputs.environment }}
+      account-id: ${{ github.event.inputs.account_id }}
+      region: ${{ github.event.inputs.region }}
+      role-name: irs-taxtools-dev-cfn-deploy-role
+      stack-name: irs-taxtools-dev-ecs-cluster
+      # Ensure these paths match your repository structure
+      template-file: cloudformation/ecs/ecs-cluster.yml
+      parameters-file: cloudformation/ecs/ecs-params.json
+      tags-file: ./tags.json
+      capabilities: CAPABILITY_NAMED_IAM

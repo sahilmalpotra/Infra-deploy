@@ -19,7 +19,7 @@ Parameters:
     Type: String
     Default: irs-taxtools-dev-cfn-deploy-role
     Description: Existing CloudFormation deploy role name
-  
+
 
 Resources:
   ECSCreateCluster:
@@ -55,12 +55,12 @@ Resources:
   Outputs:
     ClusterName:
       Description: Name of the ECS cluster
-      Value: !Ref ecs:CreateCluster
+      Value: !Ref ECSCreateCluster
       Export:
         Name: !Sub "${ProjectName}-${EnvironmentName}-ECSClusterName"
     ClusterArn:
       Description: ARN of the ECS cluster
-      Value: !GetAtt ecs:CreateCluster.Arn
+      Value: !GetAtt ECSCreateCluster.Arn
       Export:
         Name: !Sub "${ProjectName}-${EnvironmentName}-ECSClusterArn"  
     LogGroup1040:
